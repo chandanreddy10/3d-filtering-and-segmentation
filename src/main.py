@@ -28,8 +28,8 @@ pcd = o3d.io.read_point_cloud(str(pcd_path))
 
 def region_growing_segmentation(
     pcd,
-    k=30,
-    distance_thresh=0.02,
+    k=20,
+    distance_thresh=0.01,
     normal_thresh=0.8,
     min_cluster_size=50,
     visualize=True
