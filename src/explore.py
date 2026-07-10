@@ -1,37 +1,26 @@
 from pathlib import Path
 import yaml
-import open3d as o3d
 import os
 
+from utils.ply_utils import visualize_point_cloud, inspect_ply_file
+
 ROOT_DIR = Path(__file__).parents[1]
+
 CONFIG_FILE = ROOT_DIR / "config.yaml"
 
-with open(CONFIG_FILE, "r") as file:
-    CONFIG = yaml.safe_load(file)
+with open(CONFIG_FILE) as f:
+    CONFIG = yaml.safe_load(f)
 
 DATA_FOLDER = ROOT_DIR / CONFIG["DATA_FOLDER"]
 
-# Load point cloud
-point_cloud_files = os.listdir(DATA_FOLDER)
-pcd_path = Path(DATA_FOLDER) / point_cloud_files[2]
+files = sorted(os.listdir(DATA_FOLDER))
 
-# pcd = o3d.io.read_point_cloud(str(pcd_path))
-# pcd = pcd.voxel_down_sample(voxel_size=0.001)
+for i, file in enumerate(files):
+    print(i, file)
 
-# # Visualize
-# o3d.visualization.draw_geometries(
-#     [pcd],
-#     window_name="Point Cloud Viewer",
-#     width=1280,
-#     height=720
-# )
+INDEX = 2
 
-from pathlib import Path
+ply_path = DATA_FOLDER / files[INDEX]
 
-with open(pcd_path, "rb") as f:
-    while True:
-        line = f.readline().decode("ascii", errors="ignore")
-        print(line.strip())
-
-        if line.strip() == "end_header":
-            break
+inspect_ply_file(ply_path)
+visualize_point_cloud(ply_path, voxel_size=0.001)
