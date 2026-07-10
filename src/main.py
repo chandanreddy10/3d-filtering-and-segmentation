@@ -9,6 +9,9 @@ from utils import preprocess
 
 ROOT_DIR = Path(__file__).parents[1]
 CONFIG_FILE = ROOT_DIR / "config.yaml"
+OUTPUT_DIR = ROOT_DIR / "processed"
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 with open(CONFIG_FILE, "r") as file:
     CONFIG = yaml.safe_load(file)
@@ -16,7 +19,10 @@ with open(CONFIG_FILE, "r") as file:
 DATA_FOLDER = ROOT_DIR / CONFIG["DATA_FOLDER"]
 
 point_cloud_files = os.listdir(DATA_FOLDER)
-pcd_path = Path(DATA_FOLDER) / point_cloud_files[2]
+point_cloud_file = point_cloud_files[2]
+
+pcd_path = Path(DATA_FOLDER) / point_cloud_file
+pcd_output_path = Path(OUTPUT_DIR) / point_cloud_file
 
 pcd = o3d.io.read_point_cloud(str(pcd_path))
 
@@ -106,7 +112,7 @@ last, _ = last.remove_statistical_outlier(20, 1.2)
 
 o3d.visualization.draw_geometries([last])
 
-output_path = Path(pcd_path).with_suffix("").as_posix() + "_processed.ply"
+output_path = Path(pcd_output_path).with_suffix("").as_posix() + "_processed.ply"
 
 o3d.io.write_point_cloud(output_path, last)
 
