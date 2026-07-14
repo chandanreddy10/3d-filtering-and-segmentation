@@ -3,22 +3,42 @@ import open3d as o3d
 import numpy as np
 
 
-def get_ply_header(ply_path):
-    """
-    Reads PLY header and extracts metadata.
-    """
+#Support for glb files
+from pygltflib import GLTF2
 
-    header = []
+def get_ply_header(file_path):
 
-    with open(ply_path, "rb") as f:
-        while True:
-            line = f.readline().decode("ascii", errors="ignore").strip()
-            header.append(line)
+    ext = Path(file_path).suffix.lower()
 
-            if line == "end_header":
-                break
+    if ext == ".ply":
+        header = []
 
-    return header
+        with open(file_path, "rb") as f:
+            while True:
+                line = f.readline().decode("ascii", errors="ignore").strip()
+                header.append(line)
+
+                if line == "end_header":
+                    break
+
+        return header
+
+    elif ext == ".glb":
+        gltf = GLTF2().load(file_path)
+
+        return {
+            "asset": gltf.asset,
+            "scenes": len(gltf.scenes),
+            "nodes": len(gltf.nodes),
+            "meshes": len(gltf.meshes),
+            "materials": len(gltf.materials),
+            "images": len(gltf.images),
+            "textures": len(gltf.textures),
+            "cameras": len(gltf.cameras),
+        }
+
+    else:
+        raise ValueError(f"Unsupported file format: {ext}")
 
 
 def inspect_ply_file(ply_path):
