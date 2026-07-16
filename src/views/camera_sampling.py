@@ -1,73 +1,51 @@
+"""
+Script provides functions to inspect, and load a camera view.
+
+"""
+
 import open3d as o3d
+import json
 import numpy as np
 
-from pathlib import Path
-import yaml
-import os
-import json
- 
-import sys 
 
-ROOT_DIR = Path(__file__).parents[1]
-sys.path.append(str(ROOT_DIR))
+def inspect_camera_view(pcd: o3d.geometry.PointCloud) -> list:
+    """
+    Function to Inspect a camera view
+    Args:
+    pcd : a point cloud
 
-from utils.preprocess import preprocess_point_cloud
+    Returns
+    [list] : List of camera views
 
-ROOT_DIR_CONFIG= Path(__file__).parents[2]
-
-CONFIG_FILE = ROOT_DIR_CONFIG / "config.yaml"
-
-with open(CONFIG_FILE) as f:
-    CONFIG = yaml.safe_load(f)
-
-DATA_FOLDER = ROOT_DIR_CONFIG / CONFIG["DATA_FOLDER"]
-
-files = sorted(os.listdir(DATA_FOLDER))
-
-for i, file in enumerate(files):
-    print(i, file)
-
-INDEX = 1
-
-ply_path = DATA_FOLDER / files[INDEX]
-
-def inspect_camera_view(ply_path):
-
-    pcd = o3d.io.read_point_cloud(ply_path)
-    pcd = preprocess_point_cloud(pcd, voxel_size=0.005)
+    """
     camera_views_list = []
     if not pcd.has_colors():
         pcd.paint_uniform_color([0.7, 0.7, 0.7])
 
-
     vis = o3d.visualization.VisualizerWithKeyCallback()
 
-    vis.create_window(
-        window_name="Rotate to desired view",
-        width=1280,
-        height=720
-    )
+    vis.create_window(window_name="Rotate to desired view", width=1280, height=720)
 
     vis.add_geometry(pcd)
-
 
     def save_camera(vis):
         ctr = vis.get_view_control()
         params = ctr.convert_to_pinhole_camera_parameters()
 
-        camera_views_list.append({
-            "intrinsic": {
-                "width": params.intrinsic.width,
-                "height": params.intrinsic.height,
-                "intrinsic_matrix": params.intrinsic.intrinsic_matrix.tolist()
-            },
-            "extrinsic": params.extrinsic.tolist()
-        })
+        camera_views_list.append(
+            {
+                "intrinsic": {
+                    "width": params.intrinsic.width,
+                    "height": params.intrinsic.height,
+                    "intrinsic_matrix": params.intrinsic.intrinsic_matrix.tolist(),
+                },
+                "extrinsic": params.extrinsic.tolist(),
+            }
+        )
 
         print(f"Camera {len(camera_views_list)} saved!")
 
         return False
-
 
     vis.register_key_callback(ord("S"), save_camera)
 
@@ -80,9 +58,96 @@ def inspect_camera_view(ply_path):
     vis.run()
     vis.destroy_window()
 
-    with open("camera.json", "w") as f:
-        json.dump(camera_views_list, f, indent=4)
+    return camera_views_list
 
-    print(f"Saved {len(camera_views_list)} camera views to camera.json")
 
-inspect_camera_view(ply_path)
+def load_camera_from_config(camera_config):
+    """
+    Convert one camera dictionary into Open3D PinholeCameraParameters
+    """
+
+    intrinsic_data = camera_config["intrinsic"]
+
+    intrinsic = o3d.camera.PinholeCameraIntrinsic()
+
+    intrinsic.set_intrinsics(
+        width=intrinsic_data["width"],
+        height=intrinsic_data["height"],
+        fx=intrinsic_data["intrinsic_matrix"][0][0],
+        fy=intrinsic_data["intrinsic_matrix"][1][1],
+        cx=intrinsic_data["intrinsic_matrix"][0][2],
+        cy=intrinsic_data["intrinsic_matrix"][1][2],
+    )
+
+    params = o3d.camera.PinholeCameraParameters()
+
+    params.intrinsic = intrinsic
+    params.extrinsic = np.array(camera_config["extrinsic"])
+
+    return params
+
+
+def visualize_with_saved_camera(pcd: o3d.geometry.PointCloud, config: dict):
+
+    if not pcd.has_colors():
+        pcd.paint_uniform_color([0.7, 0.7, 0.7])
+
+    vis = o3d.visualization.Visualizer()
+
+    vis.create_window(window_name="Saved camera view", width=1280, height=720)
+
+    vis.add_geometry(pcd)
+
+    vis.poll_events()
+    vis.update_renderer()
+
+    ctr = vis.get_view_control()
+    params = load_camera_from_config(config)
+
+    ctr.convert_from_pinhole_camera_parameters(params, allow_arbitrary=True)
+
+    vis.run()
+
+    vis.destroy_window()
+
+
+def render_camera_view_to_png(
+    pcd: o3d.geometry.PointCloud,
+    camera_config: dict,
+    output_path: str,
+    width: int = 1280,
+    height: int = 720,
+):
+    """
+    Render point cloud from a saved camera view and save PNG.
+    """
+
+    if not pcd.has_colors():
+        pcd.paint_uniform_color([0.7, 0.7, 0.7])
+
+    vis = o3d.visualization.Visualizer()
+
+    vis.create_window(visible=False, width=width, height=height)
+
+    vis.add_geometry(pcd)
+
+    # Need one render update before applying camera
+    vis.poll_events()
+    vis.update_renderer()
+
+    ctr = vis.get_view_control()
+
+    params = load_camera_from_config(camera_config)
+
+    ctr.convert_from_pinhole_camera_parameters(params, allow_arbitrary=True)
+
+    # Render
+    vis.poll_events()
+    vis.update_renderer()
+
+    # Save screenshot
+    vis.capture_screen_image(output_path, do_render=True)
+
+    vis.destroy_window()
+
+    return output_path
