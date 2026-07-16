@@ -1,54 +1,104 @@
 import numpy as np
 import open3d as o3d
 
+
 def voxel_downsample(
     pcd: o3d.geometry.PointCloud,
-    voxel_size: float = 0.02,
-) -> o3d.geometry.PointCloud:
+    voxel_size: float = 0.02
+):
     """
-    Downsample a point cloud using voxel grid filtering.
+    Downsample point cloud using voxel grid.
     """
-    print(f"Original points: {len(pcd.points):,}")
 
-    pcd = pcd.voxel_down_sample(voxel_size=voxel_size)
+    print(f"Before voxel downsampling: {len(pcd.points):,}")
+
+    pcd = pcd.voxel_down_sample(
+        voxel_size=voxel_size
+    )
 
     print(f"After voxel downsampling: {len(pcd.points):,}")
 
     return pcd
 
 
-def remove_outliers(
+
+def statistical_outlier_removal(
     pcd: o3d.geometry.PointCloud,
     nb_neighbors: int = 30,
-    std_ratio: float = 2.0,
-) -> o3d.geometry.PointCloud:
+    std_ratio: float = 2.0
+):
     """
-    Remove statistical outliers from a point cloud.
+    Remove points whose average distance from neighbors
+    is larger than the global mean + std_ratio * std.
     """
-    pcd, _ = pcd.remove_statistical_outlier(
+
+    print(f"Before statistical removal: {len(pcd.points):,}")
+
+    pcd, ind = pcd.remove_statistical_outlier(
         nb_neighbors=nb_neighbors,
-        std_ratio=std_ratio,
+        std_ratio=std_ratio
     )
 
-    print(f"After outlier removal: {len(pcd.points):,}")
+    print(f"After statistical removal: {len(pcd.points):,}")
 
     return pcd
 
 
-def estimate_normals(
+
+def radius_outlier_removal(
     pcd: o3d.geometry.PointCloud,
-    radius: float = 0.1,
-    max_nn: int = 30,
-) -> o3d.geometry.PointCloud:
+    nb_points: int = 16,
+    radius: float = 0.05
+):
     """
-    Estimate surface normals.
+    Remove points that do not have enough neighbors
+    within a fixed radius.
     """
-    pcd.estimate_normals(
-        search_param=o3d.geometry.KDTreeSearchParamHybrid(
-            radius=radius,
-            max_nn=max_nn,
-        )
+
+    print(f"Before radius removal: {len(pcd.points):,}")
+
+    pcd, ind = pcd.remove_radius_outlier(
+        nb_points=nb_points,
+        radius=radius
     )
+
+    print(f"After radius removal: {len(pcd.points):,}")
+
+    return pcd
+
+
+
+def preprocess_point_cloud(
+    pcd,
+    voxel_size=0.02,
+    statistical=True,
+    radius=True
+):
+    """
+    Complete preprocessing pipeline.
+    """
+
+    # 1. Voxel downsampling
+    pcd = voxel_downsample(
+        pcd,
+        voxel_size
+    )
+
+    # 2. Statistical outlier removal
+    if statistical:
+        pcd = statistical_outlier_removal(
+            pcd,
+            nb_neighbors=30,
+            std_ratio=2.0
+        )
+
+    # 3. Radius outlier removal
+    if radius:
+        pcd = radius_outlier_removal(
+            pcd,
+            nb_points=16,
+            radius=0.05
+        )
 
     return pcd
 
