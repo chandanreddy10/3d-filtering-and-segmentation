@@ -1,3 +1,17 @@
+"""
+Preprocessing Utilities.
+Available :
+1.Downsampling
+2.SOR
+3.ROR
+4.Plate removal to remove dominant plane
+5.Cylinder filter 
+
+
+"""
+
+
+
 import numpy as np
 import open3d as o3d
 
@@ -70,9 +84,9 @@ def radius_outlier_removal(
 
 def preprocess_point_cloud(
     pcd,
-    voxel_size=0.02,
+    voxel_size=0.001,
     statistical=True,
-    radius=True
+    radius=False
 ):
     """
     Complete preprocessing pipeline.

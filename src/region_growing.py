@@ -1,3 +1,10 @@
+"""
+Region growing segmentation approach.
+To Run : python region_growing.py
+
+"""
+
+
 from pathlib import Path
 import yaml
 import open3d as o3d

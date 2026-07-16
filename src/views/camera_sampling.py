@@ -4,16 +4,23 @@ import numpy as np
 from pathlib import Path
 import yaml
 import os
-import json 
+import json
+ 
+import sys 
 
-ROOT_DIR = Path(__file__).parents[2]
+ROOT_DIR = Path(__file__).parents[1]
+sys.path.append(str(ROOT_DIR))
 
-CONFIG_FILE = ROOT_DIR / "config.yaml"
+from utils.preprocess import preprocess_point_cloud
+
+ROOT_DIR_CONFIG= Path(__file__).parents[2]
+
+CONFIG_FILE = ROOT_DIR_CONFIG / "config.yaml"
 
 with open(CONFIG_FILE) as f:
     CONFIG = yaml.safe_load(f)
 
-DATA_FOLDER = ROOT_DIR / CONFIG["DATA_FOLDER"]
+DATA_FOLDER = ROOT_DIR_CONFIG / CONFIG["DATA_FOLDER"]
 
 files = sorted(os.listdir(DATA_FOLDER))
 
@@ -27,6 +34,7 @@ ply_path = DATA_FOLDER / files[INDEX]
 def inspect_camera_view(ply_path):
 
     pcd = o3d.io.read_point_cloud(ply_path)
+    pcd = preprocess_point_cloud(pcd, voxel_size=0.005)
     camera_views_list = []
     if not pcd.has_colors():
         pcd.paint_uniform_color([0.7, 0.7, 0.7])
