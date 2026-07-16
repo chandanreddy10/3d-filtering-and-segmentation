@@ -1,2 +1,4 @@
 DATA_FOLDER: data
 OUTPUT_FOLDER: saved_images
+CAMERA_PARAMS_JSON: camera_config
+VIEWS_FOLDER: renders
