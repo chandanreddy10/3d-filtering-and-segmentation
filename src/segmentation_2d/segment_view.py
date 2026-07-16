@@ -76,14 +76,12 @@ def segment_images(
 
         #save masks
         if save_dir:
+            mask_array = masks.cpu().numpy().astype(bool)
 
-            mask_array = masks.cpu().numpy()
-
-            for i, mask in enumerate(mask_array):
-
-                mask_img = Image.fromarray((mask * 255).astype(np.uint8))
-
-                mask_img.save(save_dir / f"{image_path.stem}_mask_{i}.png")
+            np.save(
+                save_dir / f"{image_path.stem}.npy",
+                mask_array
+            )
 
     return results_dict
 
