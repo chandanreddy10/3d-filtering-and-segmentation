@@ -1,6 +1,56 @@
 import numpy as np
 import open3d as o3d
 
+def voxel_downsample(
+    pcd: o3d.geometry.PointCloud,
+    voxel_size: float = 0.02,
+) -> o3d.geometry.PointCloud:
+    """
+    Downsample a point cloud using voxel grid filtering.
+    """
+    print(f"Original points: {len(pcd.points):,}")
+
+    pcd = pcd.voxel_down_sample(voxel_size=voxel_size)
+
+    print(f"After voxel downsampling: {len(pcd.points):,}")
+
+    return pcd
+
+
+def remove_outliers(
+    pcd: o3d.geometry.PointCloud,
+    nb_neighbors: int = 30,
+    std_ratio: float = 2.0,
+) -> o3d.geometry.PointCloud:
+    """
+    Remove statistical outliers from a point cloud.
+    """
+    pcd, _ = pcd.remove_statistical_outlier(
+        nb_neighbors=nb_neighbors,
+        std_ratio=std_ratio,
+    )
+
+    print(f"After outlier removal: {len(pcd.points):,}")
+
+    return pcd
+
+
+def estimate_normals(
+    pcd: o3d.geometry.PointCloud,
+    radius: float = 0.1,
+    max_nn: int = 30,
+) -> o3d.geometry.PointCloud:
+    """
+    Estimate surface normals.
+    """
+    pcd.estimate_normals(
+        search_param=o3d.geometry.KDTreeSearchParamHybrid(
+            radius=radius,
+            max_nn=max_nn,
+        )
+    )
+
+    return pcd
 
 def cylinder_filter(
     pcd: o3d.geometry.PointCloud,

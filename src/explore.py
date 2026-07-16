@@ -2,7 +2,7 @@ from pathlib import Path
 import yaml
 import os
 
-from utils.ply_utils import visualize, get_file_metadata
+from utils.ply_utils import visualize_point_cloud, inspect_ply_file
 
 ROOT_DIR = Path(__file__).parents[1]
 
@@ -22,6 +22,6 @@ INDEX = 1
 
 ply_path = DATA_FOLDER / files[INDEX]
 
-get_file_metadata(ply_path)
-visualize(ply_path, voxel_size=0.001)
+inspect_ply_file(ply_path)
+visualize_point_cloud(ply_path, voxel_size=0.001)
 
