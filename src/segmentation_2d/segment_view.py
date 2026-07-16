@@ -20,8 +20,6 @@ def load_sam3(device="cuda"):
 
 def segment_images(
     image_paths,
-    model,
-    processor,
     device="cuda",
     prompt="Objects",
     threshold=0.5,
@@ -47,7 +45,7 @@ def segment_images(
               image_path: masks
             }
     """
-
+    model, processor = load_sam3()
     if save_dir:
         save_dir = Path(save_dir)
         save_dir.mkdir(exist_ok=True)
