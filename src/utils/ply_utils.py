@@ -1,3 +1,10 @@
+"""
+Utilities to visualize the inspect Ply files.
+Support for glb files coming soon.
+
+"""
+
+
 from pathlib import Path
 import open3d as o3d
 import numpy as np
