@@ -35,4 +35,4 @@ for (image_path, masks), img_path in zip(result_dict.items(), os.listdir(images_
     save_path = Path(SAVE_DIR / image_path.name)
     image_overlay = segment_view.overlay_masks(image, masks, save_path )
 
-print("Saved Masks and overlaz images")
+print("Saved Masks and overlay images")
