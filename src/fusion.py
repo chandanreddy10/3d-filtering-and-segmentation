@@ -24,36 +24,10 @@ CAMERA_FOLDER = ROOT_DIR / CONFIG["CAMERA_PARAMS_JSON"]
 RENDERS_FOLDER = ROOT_DIR / CONFIG["VIEWS_FOLDER"]
 MASKS_FOLDER = ROOT_DIR / CONFIG["SEGMENT_MASKS_FOLDER"]
 
-files = sorted(os.listdir(DATA_FOLDER))
-
-for i, file in enumerate(files):
-    print(i, file)
-
-INDEX = 0
-ply_file = files[INDEX]
-ply_path = DATA_FOLDER / ply_file
-
-pcd_name = Path(ply_file).stem
-
-pcd_views_folder = RENDERS_FOLDER / pcd_name
-pcd_masks_folder = MASKS_FOLDER / pcd_name
-pcd_camera_folder = CAMERA_FOLDER
-
-camera_json_path = pcd_camera_folder / "camera.json"
-
-with open(camera_json_path, "r") as file:
-    camera_config = json.load(file)
-
-print(f"\nProcessing: {pcd_name}")
-pcd = o3d.io.read_point_cloud(str(ply_path))
-
-print(f"Loaded points: {len(pcd.points):,}")
-
-# Preprocess
-pcd = preprocess_point_cloud(pcd, voxel_size=0.005)
-
-for i, camera in enumerate(camera_config):
-
+def visualise_single_view(pcd, camera_config, index = 0):
+    
+    camera = camera_config[index]
+    i = index
     image_path = pcd_views_folder / f"view_{i:03d}.png"
     masks_path = pcd_masks_folder / f"view_{i:03d}.npy"
 
@@ -92,8 +66,37 @@ for i, camera in enumerate(camera_config):
     depth_scale=1000.0,
     depth_trunc=1000.0,
     )
-
+    
+    print(points[0], labels[0])
     # points[i] corresponds to labels[i]
     visualize_labeled_point_cloud(points, labels)
-    
-    break
+
+
+files = sorted(os.listdir(DATA_FOLDER))
+
+for i, file in enumerate(files):
+    print(i, file)
+
+INDEX = 0
+ply_file = files[INDEX]
+ply_path = DATA_FOLDER / ply_file
+
+pcd_name = Path(ply_file).stem
+
+pcd_views_folder = RENDERS_FOLDER / pcd_name
+pcd_masks_folder = MASKS_FOLDER / pcd_name
+pcd_camera_folder = CAMERA_FOLDER
+
+camera_json_path = pcd_camera_folder / "camera.json"
+
+with open(camera_json_path, "r") as file:
+    camera_config = json.load(file)
+
+print(f"\nProcessing: {pcd_name}")
+pcd = o3d.io.read_point_cloud(str(ply_path))
+
+print(f"Loaded points: {len(pcd.points):,}")
+
+# Preprocess
+pcd = preprocess_point_cloud(pcd, voxel_size=0.005)
+visualise_single_view(pcd, camera_config, 18)
