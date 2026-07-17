@@ -130,6 +130,7 @@ def visualize_labeled_point_cloud(
     background_color=(0.6, 0.6, 0.6),
     seed: int = 42,
     point_size: float = 3.0,
+    visualise=False
 ):
     """
     Visualizes a point cloud colored by per-point object labels.
@@ -147,13 +148,14 @@ def visualize_labeled_point_cloud(
     pcd.points = o3d.utility.Vector3dVector(points)
     pcd.colors = o3d.utility.Vector3dVector(colors)
 
-    vis = o3d.visualization.Visualizer()
-    vis.create_window()
-    vis.add_geometry(pcd)
-    opt = vis.get_render_option()
-    opt.point_size = point_size
-    opt.background_color = np.array([0.05, 0.05, 0.05])
-    vis.run()
-    vis.destroy_window()
+    if visualise:
+        vis = o3d.visualization.Visualizer()
+        vis.create_window()
+        vis.add_geometry(pcd)
+        opt = vis.get_render_option()
+        opt.point_size = point_size
+        opt.background_color = np.array([0.05, 0.05, 0.05])
+        vis.run()
+        vis.destroy_window()
 
     return pcd
