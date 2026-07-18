@@ -1,3 +1,8 @@
+"""
+Inspect PLY Files and visualise Point Cloud.
+"""
+
+
 from pathlib import Path
 import yaml
 import os

@@ -1,3 +1,9 @@
+"""
+Runs Segmentation on 2D views.
+
+"""
+
+
 from pathlib import Path
 import yaml
 import json

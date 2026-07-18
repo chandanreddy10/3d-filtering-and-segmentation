@@ -1,3 +1,13 @@
+"""
+Code to load Point cloud, filter noise, save View (and its metadata)
+The Camera intrinsic, extrinsic is also stored.
+
+Run:
+    python save_views.py
+
+To capture a View click S.
+"""
+
 from pathlib import Path
 import yaml
 import os

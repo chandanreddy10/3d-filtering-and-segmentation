@@ -60,7 +60,7 @@ def create_labeled_point_cloud_from_depth_and_masks(
     intrinsic: np.ndarray,
     masks: np.ndarray,
     extrinsic: np.ndarray = None,
-    depth_scale: float = 1000.0,
+    depth_scale: float = 1,
     depth_trunc: float = 1000.0,
     stride: int = 1,
     project_valid_depth_only: bool = True,
